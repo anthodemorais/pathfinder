@@ -1,7 +1,13 @@
 import collections
 import operator
+import argparse
 
-f = open("labyrinth1.txt", "r")
+parser = argparse.ArgumentParser(description="Finds and returns the shortest path in a labyrinth")
+parser.add_argument("file", help="the path of the file that contains the labyrinth")
+
+args = parser.parse_args()
+
+f = open(args.file, "r")
 text = f.read()
 fullLines = text.split("\n")
 
@@ -12,18 +18,18 @@ start = ()
 
 for (x, line) in enumerate(lines):
     for (y, col) in enumerate(line):
-        validValues = [" ", "X", "@"]
+        validValues = [" ", "/", "X", "@"]
         if col in validValues:
             index = (x, y)
             tree[index] = {}
             if x != 0 and lines[x-1][y] in validValues:
-                tree[index][(x-1, y)] = 1
+                tree[index][(x-1, y)] = 3 if col == "/" else 1
             if x != (len(lines)-1) and lines[x+1][y] in validValues:
-                tree[index][(x+1, y)] = 1
+                tree[index][(x+1, y)] = 3 if col == "/" else 1
             if y != 0 and lines[x][y-1] in validValues:
-                tree[index][(x, y-1)] = 1
+                tree[index][(x, y-1)] = 3 if col == "/" else 1
             if y != (len(line)-1) and lines[x][y+1] in validValues:
-                tree[index][(x, y+1)] = 1
+                tree[index][(x, y+1)] = 3 if col == "/" else 1
             if col == "X":
                 end = index
             if col == "@":
@@ -114,12 +120,13 @@ def visitNearestCity(graph, times, visited):
 
 path = getTrip(tree, start, end)
 
-for (x, line) in enumerate(lines):
-    for (y, col) in enumerate(line):
-        if (x, y) in path and col == " ":
-            lines[x][y] = "."
-
-finalLines = [''.join(line) for line in lines]
-finalPath = "\n".join(finalLines)
-
-print(finalPath)
+if path != "Unreachable":
+    for (x, line) in enumerate(lines):
+        for (y, col) in enumerate(line):
+            if (x, y) in path and col == " ":
+                lines[x][y] = "."
+    finalLines = [''.join(line) for line in lines]
+    finalPath = "\n".join(finalLines)
+    print(finalPath)
+else:
+    print(path)
